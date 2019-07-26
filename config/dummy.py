@@ -7,16 +7,24 @@
 
 
 class Task_Config(object):
+    r"""
+    Simple dummy config file
+    """
     name = 'LTTT_TOY_train_StdM'
-    actions = ('prep', 'engine', 'post', 'stat')
+    # actions = ('prep', 'engine', 'post', 'stat')
+    actions = {  # action_name : action_class
+        'prep': 'TOY_gen1',
+    }
 
     prep = {
+        'input_type': list,
         'data_name': 'TOY',
         'data_root': './data/nasdaq100/',
         'data_size': [1000, 50, 50],
     }
 
     engine = {
+        'input_type': '',
         'runtime': {
             'platform': 'pytorch',
             'args': {'local_rank': ('0', 'int'), 'nproc_per_node': ('1', 'int')}

@@ -11,7 +11,7 @@ from multiprocessing import Manager, Pool
 # unused
 # from functools import partial
 
-class logger(object):
+class Logger(object):
     """
     A stadard logger for tracking information (a queue).
     """
@@ -23,12 +23,18 @@ class logger(object):
         self.pool = Pool()
 
     def write(self, str_in):
-        # pusher = partial(logger._push, self.log_queue)
+        # pusher = partial(Logger._push, self.log_queue)
         # self.pool.map(pusher, str_in)
-        self.pool.apply(logger._push, args=(self.log_queue, str_in))
-        # poper = partial(logger._pop, self.log_queue)
+        self.pool.apply(Logger._push, args=(self.log_queue, str_in))
+        # poper = partial(Logger._pop, self.log_queue)
         # self.pool.map(poper, [])
-        self.pool.apply(logger._pop, args=(self.log_queue,))
+        self.pool.apply(Logger._pop, args=(self.log_queue,))
+
+    def error(self, str_in):
+        self.write('[ERROR] '+ str_in)
+
+    def info(self, str_in):
+        self.write('[INFO] '+ str_in)
 
     def quit(self):
         self.pool.close()
@@ -48,11 +54,11 @@ class logger(object):
         return item
 
 
-class logger_es(logger):
+class Logger_es(Logger):
     """
     A simple logger flush data into a elasticserach database
     """
 
     def __init__(self, name='noname'):
-        super(logger_es, self).__init__(name)
+        super(Logger_es, self).__init__(name)
         self.out = 1

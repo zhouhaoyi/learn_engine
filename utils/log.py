@@ -7,8 +7,9 @@
 
 import time
 from multiprocessing import Manager, Pool
-from functools import partial
 
+# unused
+# from functools import partial
 
 class logger(object):
     """

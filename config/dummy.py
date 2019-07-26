@@ -8,14 +8,19 @@
 
 class Task_Config(object):
     name = 'LTTT_TOY_train_StdM'
+    actions = ('prep', 'engine', 'post', 'stat')
 
-    Prep = {
+    prep = {
         'data_name': 'TOY',
         'data_root': './data/nasdaq100/',
         'data_size': [1000, 50, 50],
     }
 
     engine = {
+        'runtime': {
+            'platform': 'pytorch',
+            'args': {'local_rank': ('0', 'int'), 'nproc_per_node': ('1', 'int')}
+        },
         'model_name': 'transformer',
         'model_args': {
             'enc_size': 82,

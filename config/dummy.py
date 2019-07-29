@@ -12,9 +12,10 @@ class Task_Config(object):
     """
     name = 'LTTT_TOY_train_StdM'
     # actions = ('prep', 'engine', 'post', 'stat')
-    actions = {  # action_name : action_class
-        'prep': 'TOY_gen1',
-    }
+    actions = [  # (action_name, action_class)
+        ('prep', 'TOY_gen1'),
+        ('prep', 'TOY_gen2'),
+    ]
 
     prep = {
         'input_type': list,

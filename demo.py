@@ -19,8 +19,8 @@ from config import dummy
 def test2():
     tlog = Logger(name='test_logger')
     tcfg = dummy.Task_Config()
-    ttas = Task(tcfg, tlog)
-    ttas.run()
+    ttask = Task(tcfg, tlog)
+    ttask.run()
 
 
 def test():

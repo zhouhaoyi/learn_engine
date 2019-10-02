@@ -9,8 +9,7 @@ import importlib
 import uuid
 import time
 
-STR_SEP = '\n\l'
-
+STR_SEP = '\n'
 
 class Task(object):
     r"""
@@ -36,12 +35,13 @@ class Task(object):
 
     def run(self):
         r"""
-        Run the task with sepcific moves (fire all the actions)
+        Run the task with specific moves (fire all the actions)
         """
         self.log.info("Task management starting!")
         feed_in = []  # initial input
         for action_name, action_object in self._workflow.items():
             feed_in = action_object.take(feed_in, self.log)
+            action_object.print_cfg(self.log)
 
         # step 1: preprocessing of data
         # step 2: run a engine
@@ -68,8 +68,8 @@ class Task(object):
         else:
             self.log.error("Wrong actions are defined.")
 
-    def __add_work(self, name, action_obejct):
-        self._workflow[name] = action_obejct
+    def __add_work(self, name, action_object):
+        self._workflow[name] = action_object
 
 
 class Action(object):
@@ -79,6 +79,7 @@ class Action(object):
 
     class Utils(object):
         move_time_dict = dict()
+
         @classmethod
         def record_move_time(cls, move_func):
             r"""
@@ -103,6 +104,24 @@ class Action(object):
         r"""
         A wrapper to fire the action
         """
+        # build the action runtime environment
+        assert 'runtime' in self.cfg_dict.keys()
+        rt_cfg = self.cfg_dict['runtime']
+        logger.write(f">> Build runtime: {rt_cfg.base}")
+        if rt_cfg.base == 'builtin':
+            # the action will run in the main thread
+            rt = None
+        elif rt_cfg.base == 'native':
+            # the action will run in the native system
+            raise EOFError  # TODO
+        elif rt_cfg.base == 'docker':
+            # the action will firstly start a docker container and run on it
+            raise EOFError  # TODO
+        else:
+            logger.error(f"Runtime basic type {rt_cfg.base} is not supported.")
+            return None
+
+        # run this action at once
         assert 'input_type' in self.cfg_dict.keys()
         if isinstance(input_object, self.cfg_dict['input_type']):
             logger.write(f'>> Into Action: {self.name}')
@@ -117,7 +136,7 @@ class Action(object):
         r"""
         Print the configuration in this action.
         """
-        cfg_str = ''
+        cfg_str = self.name + ' configuration:' + STR_SEP
         for cfg_key, cfg_value in self.cfg_dict.items():
             cfg_str += f"{cfg_key}:{cfg_value}" + STR_SEP
         logger.info(cfg_str)

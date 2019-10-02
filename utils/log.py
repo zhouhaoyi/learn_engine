@@ -54,11 +54,11 @@ class Logger(object):
         return item
 
 
-class Logger_es(Logger):
+class LoggerEs(Logger):
     """
     A simple logger flush data into a elasticserach database
     """
 
     def __init__(self, name='noname'):
-        super(Logger_es, self).__init__(name)
-        self.out = 1
+        super(LoggerEs, self).__init__(name)
+        raise NotImplementedError

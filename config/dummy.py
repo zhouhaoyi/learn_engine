@@ -12,22 +12,28 @@ class Task_Config(object):
     """
     name = 'LTTT_TOY_train_StdM'
     # actions = ('prep', 'engine', 'post', 'stat')
-    actions = [  # (action_name, action_class)
+    actions = [  # (action_name, action_class) -> 1-by-1 run sequence
         ('prep', 'TOY_gen1'),
         ('prep', 'TOY_gen2'),
     ]
 
     prep = {
         'input_type': list,
+        'runtime': {'base': 'native',
+                    'platform': 'null',
+                    'args' : 'null'}
         'data_name': 'TOY',
-        'data_root': './data/nasdaq100/',
-        'data_size': [1000, 50, 50],
+        'data_args': {
+            'data_root': './data/nasdaq100/',
+            'data_size': [1000, 50, 50],
+        }
     }
 
     engine = {
         'input_type': '',
         'runtime': {
-            'platform': 'pytorch',
+            'base': 'native',  # builtin & native & docker
+            'platform' : 'pytorch',
             'args': {'local_rank': ('0', 'int'), 'nproc_per_node': ('1', 'int')}
         },
         'model_name': 'transformer',
@@ -40,7 +46,7 @@ class Task_Config(object):
             'load_model_path': None
         },
         'type': 'train',
-        'train': {
+        'run_args': {
             'use_gpu': True,
             'batch_size': 16,
             'gpu_nums': 4,

@@ -9,7 +9,10 @@ import importlib
 import uuid
 import time
 
+from utils.runtime import Runtime
+
 STR_SEP = '\n'
+
 
 class Task(object):
     r"""
@@ -68,13 +71,13 @@ class Task(object):
         else:
             self.log.error("Wrong actions are defined.")
 
-    def __add_work(self, name, action_object):
-        self._workflow[name] = action_object
+    def __add_work(self, action_id, action_object):
+        self._workflow[action_id] = action_object
 
 
 class Action(object):
     """
-    The action is an antomic operation in workflow.
+    The action is an auto operation in workflow.
     """
 
     class Utils(object):
@@ -85,13 +88,15 @@ class Action(object):
             r"""
             Calc the running time of moves in the action.
             """
+
             def wrapper(*args, **kw):
                 start_time = time.time()
                 result = move_func(*args, **kw)
                 during_time = time.time() - start_time
                 cls.move_time_dict[move_func.__name__] = during_time
-                print('runtime: ', during_time)
+                print('running time: ', during_time)
                 return result
+
             return wrapper
 
     def __init__(self, action_name, action_cfg_in):
@@ -107,18 +112,28 @@ class Action(object):
         # build the action runtime environment
         assert 'runtime' in self.cfg_dict.keys()
         rt_cfg = self.cfg_dict['runtime']
-        logger.write(f">> Build runtime: {rt_cfg.base}")
-        if rt_cfg.base == 'builtin':
+        rt_cfg_base = rt_cfg['base']
+        logger.write(f">> Build runtime: {rt_cfg_base}")
+        if rt_cfg_base == 'builtin':
             # the action will run in the main thread
+            # the interface is transfering the variables
             rt = None
-        elif rt_cfg.base == 'native':
+        elif rt_cfg_base == 'native':
             # the action will run in the native system
-            raise EOFError  # TODO
-        elif rt_cfg.base == 'docker':
+            # the interface is a file system or database
+            # TODO: add native interface
+            # Reg the runtime
+            assert hasattr(self, 'python_file_path')
+            rt = Runtime(rt_cfg)
+            # Call the native interpreter to exec the action file
+            rt.call_native(self.python_file_path)
+        elif rt_cfg_base == 'docker':
             # the action will firstly start a docker container and run on it
-            raise EOFError  # TODO
+            # the interface is a file system or database
+            raise EOFError
+            # TODO: add docker interface
         else:
-            logger.error(f"Runtime basic type {rt_cfg.base} is not supported.")
+            logger.error(f"Runtime basic type {rt_cfg_base} is not supported.")
             return None
 
         # run this action at once
@@ -140,7 +155,6 @@ class Action(object):
         for cfg_key, cfg_value in self.cfg_dict.items():
             cfg_str += f"{cfg_key}:{cfg_value}" + STR_SEP
         logger.info(cfg_str)
-
 
     def _run(self, input_object, logger):
         r"""

@@ -20,8 +20,9 @@ class Task_Config(object):
     prep = {
         'input_type': list,
         'runtime': {'base': 'native',
-                    'platform': 'null',
-                    'args' : 'null'}
+                    'path': None,
+                    'platform': None,
+                    'args' : None},
         'data_name': 'TOY',
         'data_args': {
             'data_root': './data/nasdaq100/',
@@ -33,6 +34,7 @@ class Task_Config(object):
         'input_type': '',
         'runtime': {
             'base': 'native',  # builtin & native & docker
+            'path': None,
             'platform' : 'pytorch',
             'args': {'local_rank': ('0', 'int'), 'nproc_per_node': ('1', 'int')}
         },

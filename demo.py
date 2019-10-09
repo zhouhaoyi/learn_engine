@@ -22,7 +22,6 @@ def test2():
     ttask = Task(tcfg, tlog)
     ttask.run()
 
-
 def test():
     """
     A simple tester to Tasks

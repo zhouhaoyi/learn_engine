@@ -90,11 +90,13 @@ class Action(object):
             """
 
             def wrapper(*args, **kw):
+                log = args[-1] # requires the last param is the logger object
                 start_time = time.time()
                 result = move_func(*args, **kw)
                 during_time = time.time() - start_time
-                cls.move_time_dict[move_func.__name__] = during_time
-                print('running time: ', during_time)
+                move_name = move_func.__name__
+                cls.move_time_dict[move_name] = during_time
+                log.time(f"'{move_name}' costs: {during_time} sec.")
                 return result
 
             return wrapper
@@ -109,42 +111,44 @@ class Action(object):
         r"""
         A wrapper to fire the action
         """
-        # build the action runtime environment
+        # initial the take move
         assert 'runtime' in self.cfg_dict.keys()
         rt_cfg = self.cfg_dict['runtime']
         rt_cfg_base = rt_cfg['base']
-        logger.write(f">> Build runtime: {rt_cfg_base}")
-        if rt_cfg_base == 'builtin':
-            # the action will run in the main thread
-            # the interface is transfering the variables
-            rt = None
-        elif rt_cfg_base == 'native':
-            # the action will run in the native system
-            # the interface is a file system or database
-            # TODO: add native interface
-            # Reg the runtime
-            assert hasattr(self, 'python_file_path')
-            rt = Runtime(rt_cfg)
-            # Call the native interpreter to exec the action file
-            rt.call_native(self.python_file_path)
-        elif rt_cfg_base == 'docker':
-            # the action will firstly start a docker container and run on it
-            # the interface is a file system or database
-            raise EOFError
-            # TODO: add docker interface
-        else:
-            logger.error(f"Runtime basic type {rt_cfg_base} is not supported.")
-            return None
-
-        # run this action at once
         assert 'input_type' in self.cfg_dict.keys()
         if isinstance(input_object, self.cfg_dict['input_type']):
             logger.write(f'>> Into Action: {self.name}')
-            output_object = self._run(input_object, logger)
         else:
             logger.error(
                 f"Action {self.name} input type mismatch: " +
                 f"{type(input_object)} -> {self.cfg_dict['input_type']}.")
+            return None
+
+        # build the action runtime environment and run
+        logger.write(f">> Build runtime platform: {rt_cfg_base}")
+        if rt_cfg_base == 'builtin':
+            # the action will run in the main thread
+            rt = None
+            output_object = self._run(input_object, logger)
+        elif rt_cfg_base == 'native':
+            # the action will run in the native system
+            # Reg the runtime
+            assert hasattr(self, 'python_file_path')
+            rt = Runtime(rt_cfg)
+            # Call the native interpreter to exec the action file
+            output_object = rt.call_native(self.python_file_path)
+        elif rt_cfg_base == 'docker':
+            # the action will firstly start a docker container and run on it
+            assert hasattr(self, 'python_file_path')
+            # Reg the runtime
+            rt = Runtime(rt_cfg)
+            # Call the docker interpreter to exec the action file
+            output_object = rt.call_docker(self.python_file_path)
+            raise NotImplementedError
+        else:
+            logger.error(f"Runtime basic type {rt_cfg_base} is not supported.")
+            return None
+
         return output_object
 
     def print_cfg(self, logger):

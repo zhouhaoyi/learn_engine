@@ -19,7 +19,7 @@ class Task_Config(object):
 
     prep = {
         'input_type': list,
-        'runtime': {'base': 'native',
+        'runtime': {'base': 'builtin',
                     'path': None,
                     'platform': None,
                     'args' : None},
@@ -31,7 +31,7 @@ class Task_Config(object):
     }
 
     engine = {
-        'input_type': '',
+        'input_type': list,
         'runtime': {
             'base': 'native',  # builtin & native & docker
             'path': None,
@@ -47,7 +47,7 @@ class Task_Config(object):
             'd_layers': 6,
             'load_model_path': None
         },
-        'type': 'train',
+        'run_type': 'train',
         'run_args': {
             'use_gpu': True,
             'batch_size': 16,

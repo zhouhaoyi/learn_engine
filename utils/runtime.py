@@ -8,6 +8,7 @@ class Runtime(object):
     r"""
     The runtime is a open-box running environment for all the actions.
     But it requires a fundamental check-in for action running on native & docker.
+    The RT should manage the TempBox and LogClient.
     """
 
     def __init__(self, cfg_in):
@@ -19,7 +20,8 @@ class Runtime(object):
         self.tensor_platform = cfg_in['platform']
 
     def call_native(self, python_file_path):
-        print('test')
+        print('call python in native environment')
+        return None
 
-    def call_docker(self):
+    def call_docker(self, python_file_path):
         raise NotImplementedError

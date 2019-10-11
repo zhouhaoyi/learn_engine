@@ -11,6 +11,7 @@ from multiprocessing import Manager, Pool
 # unused
 # from functools import partial
 
+
 class Logger(object):
     """
     A stadard logger for tracking information (a queue).
@@ -31,10 +32,13 @@ class Logger(object):
         self.pool.apply(Logger._pop, args=(self.log_queue,))
 
     def error(self, str_in):
-        self.write('[ERROR] '+ str_in)
+        self.write('[ERROR] ' + str_in)
 
     def info(self, str_in):
-        self.write('[INFO] '+ str_in)
+        self.write('[INFO] ' + str_in)
+
+    def time(self, str_in):
+        self.write('[TIME] ' + str_in)
 
     def quit(self):
         self.pool.close()
